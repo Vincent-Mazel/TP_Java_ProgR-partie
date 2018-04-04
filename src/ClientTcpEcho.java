@@ -8,8 +8,7 @@ import java.net.Socket;
 public class ClientTcpEcho {
 	private String hostname;
 	private int port;
-	
-	
+
 	public ClientTcpEcho (String hostname, int port) {
 		this.hostname = hostname;
 		this.port = port;

@@ -5,39 +5,31 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ServeurTcpEcho {
 	private int nbClients;
 	private int port;
+	private int nbThreads;
 	
-	
-	public ServeurTcpEcho (int nbClients, int port) {
+	public ServeurTcpEcho (int nbClients, int port, int nbThreads) {
 		this.nbClients = nbClients;
 		this.port = port;
+		this.nbThreads = nbThreads;
 	}
 	
 	public void lancer() throws IOException {
 		Socket client;
-		BufferedWriter out;
-		BufferedReader in;
-		String chaine;
-		
+
 		ServerSocket serveur = new ServerSocket(port);
-		
+
+		ExecutorService pool = Executors.newFixedThreadPool(nbThreads);
+
 		for (int i = 1; i <= nbClients; i++) {
 			client = serveur.accept();
-			System.out.println("Client " + client.getInetAddress().getHostAddress());
-			
-			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-			out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-			
-			while ((chaine = in.readLine()) != null) {
-				out.write(chaine.toUpperCase());
-				out.newLine();
-				out.flush();
-			}
-			out.close();
-			client.close();
+			ThreadServeurEcho thread = new ThreadServeurEcho(client);
+			pool.execute(thread);
 		}
 		serveur.close();
 	}
